@@ -1,31 +1,31 @@
 import os
 import requests
 from fastapi import FastAPI, Request
+from mangum import Mangum  # ✅ Required for Vercel compatibility
 
-# Get environment variables
 TOKEN = os.getenv("BOT_TOKEN")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # Google Cloud Run URL
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")  # Set this to your Vercel deployment URL
 
 app = FastAPI()
 
 @app.on_event("startup")
 async def set_webhook():
-    """Set Telegram webhook on bot startup"""
+    """Set the webhook on Telegram bot startup"""
     url = f"https://api.telegram.org/bot{TOKEN}/setWebhook?url={WEBHOOK_URL}"
     requests.get(url)
 
 @app.post("/webhook")
 async def webhook(request: Request):
-    """Handle incoming Telegram messages"""
+    """Handle incoming messages from Telegram"""
     data = await request.json()
     chat_id = data.get("message", {}).get("chat", {}).get("id")
     text = data.get("message", {}).get("text", "").strip()
 
     if text == "/start":
-        send_message(chat_id, "Welcome! 🚀 Running on Google Cloud Run.")
+        send_message(chat_id, "Welcome! 🚀 Running on Vercel.")
     elif text == "/help":
-        send_message(chat_id, "This bot auto-scales with Cloud Run!")
-    
+        send_message(chat_id, "This bot auto-scales with Vercel serverless functions!")
+
     return {"status": "ok"}
 
 def send_message(chat_id, text):
@@ -36,8 +36,7 @@ def send_message(chat_id, text):
 
 @app.get("/")
 def home():
-    return {"status": "Bot is running on Cloud Run"}
+    return {"status": "Bot is running on Vercel with fastapi"}
 
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+# ✅ Use Mangum to make FastAPI work with Vercel
+handler = Mangum(app)
