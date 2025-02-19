@@ -3,7 +3,7 @@
     "version": 2,
     "routes": [
       { "src": "/.*", 
-      "dest": "api/main.handler" }
+      "dest": "api.main.handler" }
     ]
   }
   
